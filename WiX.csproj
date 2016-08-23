@@ -8,9 +8,9 @@
     <ProjectGuid>{A62FEE39-05B3-4FC5-A6EC-456B4F3B0216}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Inedo.BuildMasterExtensions.WiX</RootNamespace>
+    <RootNamespace>Inedo.Extensions.WiX</RootNamespace>
     <AssemblyName>WiX</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>
     </SccProjectName>
@@ -30,6 +30,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,22 +39,31 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BuildMaster.Web.Controls">
-      <HintPath>packages\Inedo.BuildMaster.SDK.3.5\lib\net20\BuildMaster.Web.Controls.dll</HintPath>
+    <Reference Include="BuildMaster.Web.Controls, Version=5.3.0.33, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.3.0\lib\net45\BuildMaster.Web.Controls.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="BuildMasterCore">
-      <HintPath>packages\Inedo.BuildMaster.SDK.3.5\lib\net20\BuildMasterCore.dll</HintPath>
+    <Reference Include="BuildMasterCore, Version=5.3.0.33, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.3.0\lib\net45\BuildMasterCore.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="ICSharpCode.SharpZipLib">
+    <Reference Include="ICSharpCode.SharpZipLib, Version=0.86.0.518, Culture=neutral, PublicKeyToken=1b03e6acf1164f73, processorArchitecture=MSIL">
       <HintPath>packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Inedo.Agents.Client, Version=420.1.0.0, Culture=neutral, PublicKeyToken=9de986a2f8db80fc, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.3.0\lib\net45\Inedo.Agents.Client.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="InedoLib">
-      <HintPath>packages\Inedo.BuildMaster.SDK.3.5\lib\net20\InedoLib.dll</HintPath>
+    <Reference Include="Inedo.ExecutionEngine, Version=39.1.0.0, Culture=neutral, PublicKeyToken=68703f0e52007e75, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.3.0\lib\net45\Inedo.ExecutionEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="InedoLib, Version=420.1.0.0, Culture=neutral, PublicKeyToken=112cfb71329714a6, processorArchitecture=MSIL">
+      <HintPath>packages\Inedo.BuildMaster.SDK.5.3.0\lib\net45\InedoLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -62,25 +72,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GenerateComponents\GenerateComponentsAction.cs" />
-    <Compile Include="GenerateComponents\GenerateComponentsActionEditor.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="Legacy\GenerateComponentsAction.cs" />
+    <Compile Include="Legacy\GenerateComponentsActionConverter.cs" />
+    <Compile Include="Legacy\UpdateProductActionConverter.cs" />
+    <Compile Include="Operations\GenerateComponentsOperation.cs" />
+    <Compile Include="Operations\SourceFile.cs" />
+    <Compile Include="Operations\UpdateProductOperation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="GenerateComponents\SourceFile.cs" />
-    <Compile Include="UpdateProduct\UpdateProductAction.cs" />
-    <Compile Include="UpdateProduct\UpdateProductActionEditor.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="Legacy\SourceFile.cs" />
+    <Compile Include="Legacy\UpdateProductAction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist $(SolutionDir) cmd /c "del $(SolutionDir)..\ExtensionLib\$(TargetName).bmx"
-if exist $(SolutionDir) $(SolutionDir)..\zip -j $(SolutionDir)..\ExtensionLib\$(TargetName).bmx *.dll
-</PostBuildEvent>
+    <PostBuildEvent>powershell -Command "if (Test-Path C:\Projects\BuildMaster\ExtensionLib -PathType Container) { Compress-Archive -Path '$(TargetDir)*' -DestinationPath C:\Projects\BuildMaster\ExtensionLib\$(TargetName).zip -Force; Move-Item C:\Projects\BuildMaster\ExtensionLib\$(TargetName).zip -Destination C:\Projects\BuildMaster\ExtensionLib\$(TargetName).bmx -Force }"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
